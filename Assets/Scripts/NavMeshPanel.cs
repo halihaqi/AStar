@@ -152,6 +152,8 @@ public class NavMeshPanel : MonoBehaviour
         btnStart.interactable = true;
         btnFin.interactable = true;
         btnObs.interactable = true;
+        start = null;
+        fin = null;
     }
     
     private void OnAStarClick()
