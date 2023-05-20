@@ -10,9 +10,9 @@ namespace AStar
         public int y;
         public Node parent;
         public bool isObs = false;
-        public float G;
-        public float H;
-        public float F => G + H;
+        public int G;
+        public int H;
+        public int F => G + H;
 
         public Node(int x, int y, Node parent = null)
         {
@@ -91,7 +91,7 @@ namespace AStar
         {
             //Search
             _start.G = 0;
-            _start.H = CalcDistance(_start, _fin);
+            _start.H = CalcH(_start, _fin);
             _open.Add(_start);
 
             while (_open.Count > 0)
@@ -113,11 +113,11 @@ namespace AStar
                 var nearNodes = GetNearNode(node);
                 foreach (var nearNode in nearNodes)
                 {
-                    float G = node.G + CalcDistance(node, nearNode);
-                    if (!_open.Contains(nearNode) || G < nearNode.G)
+                    int g = CalcG(node, nearNode);
+                    if (!_open.Contains(nearNode) || g < nearNode.G)
                     {
-                        nearNode.G = G;
-                        nearNode.H = CalcDistance(nearNode, _fin);
+                        nearNode.G = g;
+                        nearNode.H = CalcH(nearNode, _fin);
                         nearNode.parent = node;
                         if(!_open.Contains(nearNode))
                             _open.Add(nearNode);
@@ -128,9 +128,19 @@ namespace AStar
             return null;
         }
 
-        private float CalcDistance(Node start, Node fin)
+        //计算G值，只适用于相邻两点
+        //对角线算14，直线算10
+        private int CalcG(Node parent, Node cur)
         {
-            return Mathf.Abs(start.x - fin.x) + Mathf.Abs(start.y - fin.y);
+            int cost = Mathf.Abs(parent.x - cur.x) + Mathf.Abs(parent.y - cur.y) == 2 ? 14 : 10;
+            return cost + parent.G;
+        }
+
+        //计算H值
+        //只处理直线消耗，不考虑对角
+        private int CalcH(Node ori, Node fin)
+        {
+            return (Mathf.Abs(ori.x - fin.x) + Mathf.Abs(ori.y - fin.y)) * 10;
         }
 
         private List<Node> GetNearNode(Node node)
